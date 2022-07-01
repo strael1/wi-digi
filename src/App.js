@@ -1,6 +1,5 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import Header from './components/Header/Header';
-import {localit as store} from 'localit';
 import pen from './assets/icons/pen-to-square-solid.svg';
 import deleteIcon from './assets/images/Trash.png';
 import clarifyDrag from './assets/images/clarity_drag-handle-line.png';
@@ -14,9 +13,32 @@ function App() {
   const dragItem = React.useRef(null);
   const dragOverItem = React.useRef(null);
 
+
+  React.useEffect(() => {
+    const setLocalTask = () => {
+      if(tasks.length > 0){
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+      }
+    }
+    setLocalTask();
+  },[tasks])
+
+  React.useEffect(() => {
+    const getLocalTasks = () => {
+      if(localStorage.getItem("tasks") === null){
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+      }else {
+        let localTask = JSON.parse(localStorage.getItem('tasks'));
+        setTasks(localTask);
+      }
+    }
+    getLocalTasks();
+  }, []);
+
   const handleClick = () => {
     
     if(inputText !== ''){
+
       setTasks([
         ...tasks,
         {
@@ -25,7 +47,6 @@ function App() {
         }
       ])
       setText('');
-      store.set('tasks', tasks);
       setMsgError('');
     }else {
       setMsgError('Campo é obrigatório, por favor preencha o campo.');
@@ -99,25 +120,6 @@ function App() {
     setTasks(_tasks);
   }
 
-  useEffect(() => {
-    function saveLocalTasks(){
-      store.set('tasks', tasks);
-    }
-
-    saveLocalTasks();
-  }, [tasks])
-
-  useEffect(() => {
-    function getLocalTask(){
-      if(store.get('tasks') === null){
-        store.set('tasks', []);
-      }else {
-        setTasks(store.get('tasks'));
-      }
-    }
-    getLocalTask();
-  },[]);
-
   return (
 
     <div className="App">
@@ -148,7 +150,7 @@ function App() {
                       </div>
                   </div>
                   <div className="card_input_sub_items">                    
-                    <List />
+                    <List tasks={tasks} indexElement={index} id={task.id} />
                   </div>
               </div>
             ))}
